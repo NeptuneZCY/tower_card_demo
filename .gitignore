@@ -1,0 +1,26 @@
+# 忽略编译和临时文件
+[Bb]uild/
+[Ll]ogs/
+[Tt]emp/
+[Oo]bj/
+.vs/
+
+# 大文件
+[Ll]ibrary/
+
+# 忽略用户配置文件（这些文件是开发者本地的，不需要共享）
+*.user
+*.userosscache
+*.suo
+*.vcxproj.user
+
+# 忽略自动生成的文件
+*.csproj.user
+*.pdb
+*.ipch
+*.db
+
+# 保留关键的解决方案和项目文件
+!*.sln
+!*.csproj
+!*.vcxproj
