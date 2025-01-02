@@ -60,9 +60,23 @@
     <Analyzer Include="E:\workplace\unity\installs\2022.3.46f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\PlayerManager.cs" />
-    <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Card\AreaTrigger.cs" />
+    <Compile Include="Assets\Scripts\Ui\HexagonChart.cs" />
+    <Compile Include="Assets\Scripts\Dice\DiceManager.cs" />
+    <Compile Include="Assets\Scripts\Ui\HexagonAttributeChart.cs" />
+    <Compile Include="Assets\Scripts\Util\EnumUtils.cs" />
+    <Compile Include="Assets\Scripts\Card\EventCard.cs" />
+    <Compile Include="Assets\Scripts\Obj\EventCardObj.cs" />
+    <Compile Include="Assets\Scripts\Util\PrefabFactory.cs" />
+    <Compile Include="Assets\Scripts\Ui\Hexagon.cs" />
+    <Compile Include="Assets\Scripts\Card\DicePort.cs" />
+    <Compile Include="Assets\Scripts\Ui\UIPolygon.cs" />
+    <Compile Include="Assets\Scripts\Card\CardDeck.cs" />
+    <Compile Include="Assets\Scripts\Dice\Dice.cs" />
     <Compile Include="Assets\Scripts\CardSceneManager.cs" />
+    <Compile Include="Assets\Scripts\JsonManager.cs" />
+    <Compile Include="Assets\Scripts\Dice\DiceDragger.cs" />
+    <Compile Include="Assets\Scripts\Card\Card.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
