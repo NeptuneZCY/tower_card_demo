@@ -68,5 +68,6 @@ public class DiceDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IPo
             }
         }
         rectTransform.position = origin;
+        DiceManager.Instance.dicePortDict.Remove(dice);
     }
 }

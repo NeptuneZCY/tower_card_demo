@@ -73,11 +73,11 @@ public class CardSceneManager : MonoBehaviour
     {
         return
             prop == Property.SPIRIT ? 0 :
-            prop == Property.STRENTH ? 1 :
-            prop == Property.THOUGHT ? 2 :
+            prop == Property.COURAGE ? 1 :
+            prop == Property.AGILITY ? 2 :
             prop == Property.LOGIC ? 3 :
-            prop == Property.AGILITY ? 4 :
-            prop == Property.COURAGE ? 5 : 0;
+            prop == Property.THOUGHT ? 4 :
+            prop == Property.STRENTH ? 5 : 0;
     }
 
     public void RollAllDice()
