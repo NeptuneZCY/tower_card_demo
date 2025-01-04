@@ -66,10 +66,10 @@
     <Compile Include="Assets\Scripts\Ui\HexagonAttributeChart.cs" />
     <Compile Include="Assets\Scripts\Util\EnumUtils.cs" />
     <Compile Include="Assets\Scripts\Card\EventCard.cs" />
-    <Compile Include="Assets\Scripts\Obj\EventCardObj.cs" />
     <Compile Include="Assets\Scripts\Util\PrefabFactory.cs" />
     <Compile Include="Assets\Scripts\Ui\Hexagon.cs" />
     <Compile Include="Assets\Scripts\Card\DicePort.cs" />
+    <Compile Include="Assets\Scripts\Object\EventCardObj.cs" />
     <Compile Include="Assets\Scripts\Ui\UIPolygon.cs" />
     <Compile Include="Assets\Scripts\Card\CardDeck.cs" />
     <Compile Include="Assets\Scripts\Dice\Dice.cs" />
