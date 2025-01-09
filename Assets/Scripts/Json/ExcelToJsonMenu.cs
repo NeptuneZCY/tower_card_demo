@@ -10,11 +10,15 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System;
 using LitJson;
+using Unity.VisualScripting;
 
-public class ExcelToJsonGeneric
+public class ExcelToJsonMenu
 {
-    private static string excelFolderPath = "Assets/excel_config";
-    private static string jsonFolderPath = "Assets/Resources/Json_config";
+    private const string excelFolderPath = "Assets/excel_config";
+    private const string jsonFolderPath = "Assets/Resources/Json_config";
+    private const string INT_NAME = "int";
+    private const string STRING_NAME = "string";
+    private const string FLOAT_NAME = "float";
 
     [MenuItem("导表工具/批量导表")]
     public static void ConvertAllExcelToJson()
@@ -97,8 +101,19 @@ public class ExcelToJsonGeneric
             headers.Add(cell != null ? cell.StringCellValue : $"Column{i}");
         }
 
-        // 遍历行，从第二行开始（第一行是表头）
-        for (int i = 1; i <= sheet.LastRowNum; i++)
+        // 获取类型（第二行）
+        headerRow = sheet.GetRow(1);
+        if (headerRow == null) return tableData;
+
+        List<string> types = new List<string>();
+        for (int i = 0; i < headerRow.LastCellNum; i++)
+        {
+            ICell cell = headerRow.GetCell(i);
+            types.Add(cell != null ? cell.StringCellValue : $"Column{i}");
+        }
+
+        // 遍历行，从第4行开始（第一行是表头，第二行是类型，第三行是描述）
+        for (int i = 3; i <= sheet.LastRowNum; i++)
         {
             IRow row = sheet.GetRow(i);
             if (row == null) continue;
@@ -112,16 +127,13 @@ public class ExcelToJsonGeneric
                 // 处理单元格内容
                 if (cell != null)
                 {
-                    switch (cell.CellType)
+                    switch (types[j])
                     {
-                        case CellType.Numeric:
+                        case INT_NAME:
+                            value = (int)cell.NumericCellValue;
+                            break;
+                        case FLOAT_NAME:
                             value = cell.NumericCellValue;
-                            break;
-                        case CellType.String:
-                            value = cell.StringCellValue;
-                            break;
-                        case CellType.Boolean:
-                            value = cell.BooleanCellValue;
                             break;
                         default:
                             value = cell.ToString();
@@ -198,5 +210,36 @@ public class JsonDictionary<K, V> : ISerializable
     {
         set { dict[index] = value; }
         get { return dict[index]; }
+    }
+}
+
+public class TypeSelector
+{
+    public static Type GetTypeFromName(string typeName)
+    {
+        // 定义类型名称和类型的映射
+        var typeMap = new Dictionary<string, Type>
+        {
+            { "string", typeof(string) },
+            { "int", typeof(int) },
+            { "float", typeof(float) },
+            { "double", typeof(double) },
+            { "bool", typeof(bool) },
+            { "char", typeof(char) },
+            { "object", typeof(object) },
+            { "long", typeof(long) },
+            { "short", typeof(short) },
+            { "byte", typeof(byte) },
+            { "decimal", typeof(decimal) }
+        };
+
+        // 尝试从映射中获取类型
+        if (typeMap.TryGetValue(typeName, out Type type))
+        {
+            return type;
+        }
+
+        // 如果不在映射中，尝试用 Type.GetType 获取完整类型
+        return Type.GetType(typeName);
     }
 }
