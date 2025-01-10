@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,17 +11,21 @@ public class CardSceneManager : MonoBehaviour
 {
     DiceManager diceManager = DiceManager.Instance;
     JsonManager jsonManager = JsonManager.Instance;
-    static readonly float CARD_XOFFSET = 500;
-    static readonly float DICE_OFFSET = 200;
-    static readonly float weaght = 0.05f;
+    RoleManager RoleManager = RoleManager.Instance;
+    const float CARD_XOFFSET = 500;
+    const float DICE_OFFSET = 200;
+    const float weaght = 0.05f;
 
     public GameObject diceContainer;
     public GameObject cardContainer;
+    public Player player;
     CardDeck cardDeck;
     int handCardCount = 3;
 
     UIPolygon propGraph;
-    List<float> propGraphData;
+    UIPolygon prePropGraph;
+
+    Dictionary<Property, int> prePropDict;
 
     void Awake()
     {
@@ -28,9 +33,9 @@ public class CardSceneManager : MonoBehaviour
         jsonManager.Init();
 
         cardDeck = new CardDeck();
-        cardDeck.Init(EventCard.GetCardsByJsonObjs(jsonManager.eventCardObjs));
-        
-        foreach(Card card in cardDeck.cardList)
+        cardDeck.Init(EventCard.GetCardsByJsonDatas(jsonManager.eventCardDatas));
+
+        foreach (Card card in cardDeck.cardList)
         {
             if (card is EventCard)
             {
@@ -39,7 +44,35 @@ public class CardSceneManager : MonoBehaviour
         }
 
         propGraph = GameObject.Find("PropGraph").GetComponent<UIPolygon>();
-        propGraphData = Enumerable.Repeat(0.5f, 6).ToList();
+        prePropGraph = GameObject.Find("PrePropGraph").GetComponent<UIPolygon>();
+        DrawGraph();
+    }
+
+    void DrawGraph()
+    {
+        propGraph.DrawPolygon(GetPropertyRatioList());
+    }
+
+    List<float> GetPropertyList()
+    {
+        List<float> list = Enumerable.Repeat(0f, 6).ToList();
+        Debug.Log("count: " + list.Count);
+        foreach (KeyValuePair<Property, int> kvp in player.GetPropertyMap())
+        {
+            list[GetPropGraphIndex(kvp.Key)] = kvp.Value;
+        }
+        return list;
+    }
+
+    List<float> GetPropertyRatioList()
+    {
+        List<float> list = Enumerable.Repeat(0f, 6).ToList();
+        Debug.Log("count: " + list.Count);
+        foreach (KeyValuePair<Property, float> kvp in player.GetPropertyRatioMap())
+        {
+            list[GetPropGraphIndex(kvp.Key)] = kvp.Value;
+        }
+        return list;
     }
 
     // Start is called before the first frame update
@@ -54,22 +87,95 @@ public class CardSceneManager : MonoBehaviour
         
     }
 
-    public void Score()
+    // 拖入骰之后预计分
+    public void OnPrescore()
     {
         if (diceManager.dicePortDict.Count == 0) return;
+        Dictionary<Property, int> affectDict = new Dictionary<Property, int>();
         foreach (var pair in diceManager.dicePortDict)
         {
-            Debug.Log($"{pair.Key}, ${pair.Value}");
+            Debug.Log($"Score dice value: {pair.Key.value}, port: {pair.Value.affect}");
             int value = pair.Key.value;
             int affect = pair.Value.affect;
-            propGraphData[GetPropIndex(pair.Value.prop)] += value * affect * weaght;
+            Property prop = pair.Value.prop;
+            affectDict.Add(prop, value * affect);
         }
-        diceManager.dicePortDict.Clear();
-        Debug.Log("data: " + propGraphData);
-        propGraph.DrawPolygon(propGraphData);
+        List<float> list = Enumerable.Repeat(0f, 6).ToList();
+        foreach (KeyValuePair<Property, float> kvp in player.GetPropertyRatioDictByAffectDict(affectDict))
+        {
+            list[GetPropGraphIndex(kvp.Key)] = kvp.Value;
+        }
+        prePropGraph.DrawPolygon(list);
     }
 
-    int GetPropIndex(Property prop)
+    public void Score()
+    {
+        List<float> list = Enumerable.Repeat(0f, 6).ToList();
+        prePropGraph.DrawPolygon(list);
+
+        if (diceManager.dicePortDict.Count == 0) return;
+        Dictionary<Property, int> propDict = new Dictionary<Property, int>();
+        foreach (var pair in diceManager.dicePortDict)
+        {
+            Debug.Log($"Score dice value: {pair.Key.value}, port: {pair.Value.affect}");
+            int value = pair.Key.value;
+            int affect = pair.Value.affect;
+            propDict.Add(pair.Value.prop, value * affect);
+        }
+        diceManager.dicePortDict.Clear();
+        AffectPropListByDict(propDict);
+        DrawGraph();
+
+        JudgeEnding();
+    }
+
+    void JudgeEnding()
+    {
+        Ending ending = player.JudgeEnding();
+        if (ending.prop != Property.NONE)
+        {
+            string endStr = "游戏结束\n";
+            endStr += JsonManager.GetPropStr(ending.prop);
+            endStr += ending.isOverHigh ? "超过了上限" : "跌破了下限";
+            Debug.Log(endStr);
+            GameObject endingObj = GameObject.Find("EndingBg");
+            TextMeshProUGUI textMeshPro = endingObj.GetComponentInChildren<TextMeshProUGUI>();
+            textMeshPro.text = endStr;
+            endingObj.transform.localPosition = Vector2.zero;
+        }
+    }
+
+    void AffectPropListByDict(Dictionary<Property, int> dict)
+    {
+        foreach (var pair in dict)
+        {
+            switch (pair.Key)
+            {
+                case Property.SPIRIT:
+                    player.attribute_1 += pair.Value;
+                    break;
+                case Property.LOGIC:
+                    player.attribute_2 += pair.Value;
+                    break;
+                case Property.AGILITY:
+                    player.attribute_3 += pair.Value;
+                    break;
+                case Property.THOUGHT:
+                    player.attribute_4 += pair.Value;
+                    break;
+                case Property.COURAGE:
+                    player.attribute_5 += pair.Value;
+                    break;
+                case Property.STRENTH:
+                    player.attribute_6 += pair.Value;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    int GetPropGraphIndex(Property prop)
     {
         return
             prop == Property.SPIRIT ? 0 :
@@ -135,7 +241,7 @@ public class CardSceneManager : MonoBehaviour
                         {
                             portPrefab.GetComponentInChildren<AreaTrigger>().dicePort = dicePort;
                             Transform portContainer = prefab.transform.Find(EventCard.PORT_CONTAINER);
-                            Transform portParent = portContainer.transform.Find("Port" + portIndex);
+                            Transform portParent = portContainer.transform.Find("Port" + (portIndex + 1));
                             if (portParent != null)
                             {
                                 portPrefab.transform.SetParent (portParent.transform, false);

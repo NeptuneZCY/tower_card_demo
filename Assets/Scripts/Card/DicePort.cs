@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class DicePort
 {
-    public PortType type;
+    public DiceType type;
     public Property prop;
     public int affect;
 
-    public DicePort(PortType type, Property prop, int affect)
+    public DicePort(DiceType type, Property prop, int affect)
     {
         this.type = type;
         this.prop = prop;

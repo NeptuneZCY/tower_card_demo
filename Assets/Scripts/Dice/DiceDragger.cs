@@ -8,8 +8,14 @@ public class DiceDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IPo
     private bool isDragging = false;  // 判断是否正在拖动
     private Vector2 origin;
     public Dice dice;
+    private CardSceneManager cardSceneManager;
 
     public RectTransform containerRectTransform;  // `DiceContainer` 的 RectTransform，用于限制范围
+
+    void Awake()
+    {
+        cardSceneManager = GameObject.Find("GameApp").GetComponent<CardSceneManager>();
+    }
 
     void Start()
     {
@@ -25,6 +31,9 @@ public class DiceDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IPo
         Vector2 localPointerPosition = eventData.position - (Vector2)rectTransform.position; // 获取点击位置相对于骰子的位置
         offset = localPointerPosition;
         isDragging = true;
+        DiceManager.Instance.dicePortDict.Remove(dice);
+        cardSceneManager.OnPrescore();
+        Debug.Log($"Start drag dice, value: {dice.value}");
     }
 
     // 当拖动时，更新物体位置，并确保物体不超出容器范围
@@ -64,10 +73,10 @@ public class DiceDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IPo
             {
                 Debug.Log($"{name} 放入了 {areaTrigger.name} 的范围！");
                 areaTrigger.OnItemDropped(this);
+                cardSceneManager.OnPrescore();
                 return;
             }
         }
         rectTransform.position = origin;
-        DiceManager.Instance.dicePortDict.Remove(dice);
     }
 }
