@@ -118,6 +118,9 @@ public class ExcelToJsonMenu
             IRow row = sheet.GetRow(i);
             if (row == null) continue;
 
+            ICell idCell = row.GetCell(1);
+            if(idCell.NumericCellValue == 0) continue;
+
             Dictionary<string, object> rowData = new Dictionary<string, object>();
             for (int j = 0; j < headers.Count; j++)
             {
